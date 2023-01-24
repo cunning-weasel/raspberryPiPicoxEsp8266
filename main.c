@@ -1,40 +1,63 @@
 #include <stdio.h>
-#include "pico/stdlib.h"
-#include "hardware/uart.h"
-#include "hardware/timer.h"
-#include "hardware/regs/dreq.h"
+#include <string.h>
+#include <pico/uart.h>
 
 #define UART_ID uart0
 #define BAUD_RATE 115200
 
-int main()
-{
-    // Set up our UART with the required speed.
-    uart_init(UART_ID, BAUD_RATE);
+#define BAUD_RATE 115200
 
-    // configure the ESP8266 in Soft AP+ Station mode
-    // using the command "AT+CWMODE=3" - sent through
-    // the UART of Pico
+void uartSerialRxMonitor(char* command, char* res);
+
+int main() {
+    // Initialize UART
+    uart_init(UART_TX, UART_RX, BAUD_RATE);
+
+    printf("UART Serial\n");
+    printf(">");
+
+    // configure as SoftAP+station mode
     char send[] = "AT+CWMODE=3";
-}
+    uart_write(send, strlen(send));
+    uart_write("\r\n", 2);
+    delay_ms(1000);
 
-    // Initialize LED pin
-    gpio_init(led_pin25);
-    gpio_set_dir(led_pin25, GPIO_OUT);
-    gpio_init(led_pin14);
-    gpio_set_dir(led_pin14, GPIO_OUT);
+    // Set SoftAP name
+    char send[] = "AT+CWSAP="pos_softap","",11,0,3";
+    uart_write(send, strlen(send));
+    uart_write("\r\n", 2);
+    delay_ms(1000);
+    char res[20];
+    uartSerialRxMonitor(send, res);
+    printf("%s\n", res);
 
-    // Loop forever
-    while (true) {
+    // enable multi connection mode
+    char send[] = "AT+CIPMUX=1";
+    uart_write(send, strlen(send));
+    uart_write("\r\n", 2);
+    delay_ms(1000);
+    uartSerialRxMonitor(send, res);
+    printf("Configured as Dual mode -> %s\n", res);
 
-        // Blink LED
-        // printf("Blinking!\r\n");
-        gpio_put(led_pin25, 1);
-        gpio_put(led_pin14, 0);
-        sleep_ms(500);
-        gpio_put(led_pin25, 0);
-        gpio_put(led_pin14, 1);
-        sleep_ms(900);
-    }
-}
-// https://raspberrypi.github.io/pico-sdk-doxygen/index.html
+    // Enable the TCP server with port 80
+    char send[] = "AT+CIPSERVER=1,80";
+    uart_write(send, strlen(send));
+    uart_write("\r\n", 2);
+    delay_ms(2000);
+    uartSerialRxMonitor(send, res);
+    printf("Server configured successfully-> %s\n", res);
+
+    // temperature reading
+    int sensor_temp = 4;
+    float conversion_factor = 3.3 / (65535);
+
+    // Here the code runs indefinitely 
+    while (1) {
+        // temperature reading
+        int reading_temp = sensor_temp.read_u16() * conversion_factor;
+        float temperature = 27 - (reading_temp - 0.706) / 0.001721;
+
+        // Place basic code for HTML page display
+        char val[100];
+        sprintf(val, "<head><title>Pi Pico
+
