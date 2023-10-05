@@ -18,7 +18,7 @@ To-Do's:
 Configure the ESP8266 as an Access Point (AP).
 Implement a WebSockets server on the ESP8266 to handle game communication.
 Serve a control interface (HTML, JS) to connected clients via the ESP8266.
-On the Raspberry Pi Pico, serve the Quake-WASM files (HTML, JS, WASM) using your C web server code.
+On the Raspberry Pi Pico, serve the Quake-WASM files (HTML, JS, WASM) using C web server code.
 The Pico will run the Quake-WASM game code, handle game logic, and manage multiplayer aspects.
 Establish UART communication between the ESP8266 and Raspberry Pi Pico for game data exchange.
 Players on other devices connect to the ESP8266's local Wi-Fi network and access the control interface.
