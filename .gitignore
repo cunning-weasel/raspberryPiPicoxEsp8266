@@ -1,3 +1,9 @@
 .vscode/*
 build
 pico-sdk
+
+# weasel-quake files
+index.html
+index.js
+index.wasm
+./output*

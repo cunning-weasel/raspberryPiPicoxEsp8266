@@ -1,7 +1,12 @@
 #include "pico/stdlib.h"
 #include "hardware/uart.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <unistd.h>
 
+#define PORT 8080
+#define BUFFER_SIZE 1024
 #define BAUD_RATE 115200
 #define UART_ID uart0
 
@@ -48,45 +53,61 @@ size_t custom_strlen_cacher(char *str)
     return len;
 }
 
-// function to receive data from the ESP8266 via UART
-void uartSerialRxMonitor(char *command, char *res) {
+// file reads
+char *read_file()
+{
+    static char buffer[BUFFER_SIZE];
+    char *current = buffer;
+    // read x bytes at a time - need to benchmark
+    int bytes;
+    int chunk = 500;
+
+    // TO-DO handle different file types
+
+    FILE *fp = fopen("index.html", "r");
+    if (fp)
+    {
+        do
+        {
+            bytes = fread(current, sizeof(char), chunk, fp);
+            current += bytes;
+        } while (bytes == chunk);
+        fclose(fp);
+        // terminate buffer so string funcs work
+        *current = '\0';
+        // printf("%s", buffer);
+        return buffer;
+    }
+    return NULL;
+}
+
+// func to receive data from the ESP8266 via UART
+void uartSerialRxMonitor(char *command, char *res)
+{
     int command_len = custom_strlen_cacher(command);
     int res_len = 0;
 
-    while (uart_any() > 0) {
+    while (uart_any() > 0)
+    {
         res[res_len] = uart_read();
         res_len++;
     }
-
     res[res_len] = '\0';
 
-    for (int i = 0; i < res_len - command_len - 5; i++) {
+    for (int i = 0; i < res_len - command_len - 5; i++)
+    {
         res[i] = res[i + command_len + 5];
     }
-
     res[res_len - command_len - 5] = '\0';
 }
 
-int main() {
-    // Initialize UART
+int main()
+{
+    // init UART
     uart_init(UART_ID, BAUD_RATE);
     printf("UART Serial\n");
     printf(">");
-
-    // configure as SoftAP+station mode
-    char command_CWMODE[] = "AT+CWMODE=3";
-    uart_write(command_CWMODE, custom_strlen_cacher(command_CWMODE));
-    uart_write("\r\n", 2);
-    delay_ms(1000);
-
-    // set SoftAP name
-    char command_CWSAP[] = "AT+CWSAP=" pos_softap "," ",11,0,3";
-    uart_write(command_CWSAP, custom_strlen_cacher(command_CWSAP));
-    uart_write("\r\n", 2);
-    delay_ms(1000);
     char res[20];
-    uartSerialRxMonitor(command_CWSAP, res);
-    printf("%s\n", res);
 
     // enable multi connection mode
     char command_CIPMUX[] = "AT+CIPMUX=1";
@@ -104,21 +125,13 @@ int main() {
     uartSerialRxMonitor(command_CIPSERVER, res);
     printf("Server configured successfully master weasel-> %s\n", res);
 
-    // temperature reading
-    int sensor_temp = 4;
-    float conversion_factor = 3.3 / (65535);
-
-    // run indefinitely
-    while (1) {
-        // temperature reading
-        int reading_temp = sensor_temp * conversion_factor;
-        float temperature = 27 - (reading_temp - 0.706) / 0.001721;
-
+    while (1)
+    {
         // HTML page display
         char val[100];
-        sprintf(val, 
-        "<head><title>Pi Pico Server</title></head><body><p>Temperature: %d deg</p></body>", 
-        (int)temperature);
+        sprintf(val,
+                "<head><title>Pi Pico Server</title></head><body><p>Temperature: %d deg</p></body>",
+                (int)69);
 
         printf("%s\n", val);
         char length[5];
