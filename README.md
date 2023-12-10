@@ -10,8 +10,8 @@
 
 ### Raspberry Pi Pico (RP2040) Responsibilities:
 
-- **Run Quake-weasel-wasm Game Code:** Execute the Quake-weasel-wasm game code, which includes game logic and graphics.
-- **Serve Quake-WASM Files:** Serve the Quake-WASM files (HTML, JS, WASM) to connected clients (players) via a web server.
+- **Run quake-weasel-wasm Game Code:** Execute the Quake-weasel-wasm game code, which includes game logic and graphics.
+- **Serve quake-weasel-wasm Files:** Serve the Quake-WASM files (HTML, JS, WASM) to connected clients (players) via a web server.
 - **Handle Multiplayer Aspects:** Manage multiplayer aspects such as game sessions and multiplayer communication.
 - **UART Communication:** Establish UART communication with the ESP8266 for game data exchange.
 
